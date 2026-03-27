@@ -11,6 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+
+# SQLite cache (regenerated on startup)
+backend/cache.db
+backend/cache.db-journal
+__pycache__
+backend/__pycache__
 
 # Editor directories and files
 .vscode/*
