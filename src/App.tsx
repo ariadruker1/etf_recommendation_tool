@@ -118,7 +118,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
   // Always exclude single-stock and unclassified
   reasoning.push({
     key: 'quality',
-    text: 'Single-stock ETFs and unclassified funds are excluded. These are synthetic instruments, not diversified investments.',
+    text: 'We automatically filtered out single-stock ETFs (which just track one company — that\'s not diversification) and unclassified funds with unreliable data.',
     icon: ShieldCheck,
   });
 
@@ -134,7 +134,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.categories = ['Equity', 'Alternative'];
       reasoning.push({
         key: 'goal',
-        text: 'Focused on Equity and Alternative funds — these offer the highest growth potential. Dividends are weighted low since you\'re reinvesting anyway.',
+        text: 'Since you\'re focused on growth, we\'re showing stock-based (Equity) and Alternative funds — these have historically offered the best long-term returns. Dividend income is weighted low because at this stage, you want compound growth, not cash payouts.',
         icon: Target,
       });
       break;
@@ -149,7 +149,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.categories = ['Equity', 'Fixed Income', 'Preferred Share'];
       reasoning.push({
         key: 'goal',
-        text: 'Prioritizing dividend-paying Equity, Fixed Income, and Preferred Share funds. ETFs with yield below 2% are filtered out — they won\'t meaningfully contribute to income.',
+        text: 'We\'re showing funds that actually pay you — dividend stocks, bonds, and preferred shares. Any ETF paying less than 2% in dividends is excluded because it won\'t generate meaningful income for you.',
         icon: Target,
       });
       break;
@@ -164,7 +164,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.categories = ['Fixed Income', 'Cash/Currency', 'Asset Allocation'];
       reasoning.push({
         key: 'goal',
-        text: 'Restricted to Fixed Income, Cash, and balanced Asset Allocation funds. Max drawdown capped at 10% — any fund that has historically dropped more is excluded.',
+        text: 'We\'re only showing the safest categories — bonds, cash equivalents, and balanced funds. Any fund that has dropped more than 10% from its peak during the selected period is excluded. Your priority is not losing money.',
         icon: Target,
       });
       break;
@@ -179,7 +179,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.categories = ['Equity', 'Fixed Income', 'Asset Allocation', 'Alternative'];
       reasoning.push({
         key: 'goal',
-        text: 'A broad mix of Equity, Fixed Income, and balanced funds. Performance and safety are weighted equally — you want growth, but not at the cost of sleep.',
+        text: 'We\'re showing a healthy mix — stocks for growth, bonds for stability, and balanced funds that do both. Growth and safety are weighted equally, so you get the best of both worlds without too much risk.',
         icon: Target,
       });
       break;
@@ -193,29 +193,29 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.weightPerformance -= 0.10;
       reasoning.push({
         key: 'horizon',
-        text: 'With under 2 years, you can\'t afford to ride out a downturn. Drawdown capped at 15% and safety weight increased. Consider whether you need this money in a HISA instead.',
+        text: 'Since you need this money within 2 years, we\'re being extra cautious. A 15% drop right before you need the cash could set you back significantly. Honestly, if you need this money very soon, a high-interest savings account might be safer than any ETF.',
         icon: Clock,
       });
       break;
     case 'medium':
       reasoning.push({
         key: 'horizon',
-        text: '2-5 year horizon gives you room to recover from modest dips but not deep bear markets. A reasonable middle ground.',
+        text: 'With 2-5 years, you have some room to recover from dips but not enough to ride out a deep bear market (which can take 3-5 years to fully recover from). We\'re keeping things moderate.',
         icon: Clock,
       });
       break;
     case 'long':
       reasoning.push({
         key: 'horizon',
-        text: '5-10 years is excellent. You can tolerate short-term volatility and benefit from compounding. Drawdown limits are relaxed.',
+        text: '5-10 years is a great investing timeframe. You can handle short-term drops because you have time for the market to recover. This is where the power of compounding really starts to show.',
         icon: Clock,
       });
       break;
     case 'very_long':
-      limits.maxDrawdown = null; // No cap — time heals
+      limits.maxDrawdown = null;
       reasoning.push({
         key: 'horizon',
-        text: '10+ years means market cycles work in your favor. No drawdown cap applied — historically, markets have always recovered over this timeframe.',
+        text: 'With 10+ years, time is your superpower. Every major market crash in history — 2008, 2020, dot-com — fully recovered within this timeframe. We\'ve removed all drawdown limits because short-term drops don\'t matter when you\'re playing the long game.',
         icon: Clock,
       });
       break;
@@ -228,7 +228,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.excludeCategories.push('Leverage/Inverse', 'Cryptocurrency');
       reasoning.push({
         key: 'risk',
-        text: 'Leveraged, inverse, and cryptocurrency ETFs are excluded — they amplify volatility beyond your comfort. Max drawdown capped at 10%.',
+        text: 'Since big drops would cause you real stress, we\'ve removed leveraged ETFs (which amplify gains AND losses — often 2x or 3x), inverse ETFs (which bet against the market), and crypto ETFs. We also capped the maximum historical drop at 10%.',
         icon: AlertTriangle,
       });
       break;
@@ -236,14 +236,14 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.excludeCategories.push('Leverage/Inverse');
       reasoning.push({
         key: 'risk',
-        text: 'Leveraged and inverse ETFs excluded — these are trading instruments, not investments. Crypto allowed but will rank lower due to volatility.',
+        text: 'Leveraged and inverse ETFs are excluded — these are short-term trading tools, not investments you hold. They can lose money even when the market goes up due to daily rebalancing. Crypto is still available but will naturally rank lower because of its volatility.',
         icon: AlertTriangle,
       });
       break;
     case 'high':
       reasoning.push({
         key: 'risk',
-        text: 'All asset classes are available. You understand that higher drawdowns are the price of higher returns. Stay disciplined.',
+        text: 'All categories are available to you. Just remember: the ability to tolerate risk is only valuable if you actually stay disciplined during a downturn. The worst thing you can do is sell at the bottom after telling yourself you wouldn\'t.',
         icon: AlertTriangle,
       });
       break;
@@ -254,7 +254,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
     case 'low':
       reasoning.push({
         key: 'fees',
-        text: 'No MER cap applied. Some higher-fee funds offer active management that may justify the cost — but watch for fee drag over time.',
+        text: 'No fee cap applied. Some actively managed funds charge higher fees (1%+) because a team of analysts is picking investments for you. The research is mixed on whether this is worth it — many expensive funds underperform cheap index funds over time.',
         icon: Wallet,
       });
       break;
@@ -263,7 +263,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.weightMER = 0.25;
       reasoning.push({
         key: 'fees',
-        text: 'MER capped at 0.75%. This filters out expensive active funds while keeping quality options available.',
+        text: 'Fees capped at 0.75% per year. For context, on a $100,000 portfolio that\'s $750/year taken automatically from your returns. This keeps out the most expensive funds while still allowing some actively managed options.',
         icon: Wallet,
       });
       break;
@@ -272,7 +272,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.weightMER = 0.35;
       reasoning.push({
         key: 'fees',
-        text: 'MER capped at 0.40%. You\'ll see mostly passive index ETFs — the evidence shows these outperform most active funds over 10+ years.',
+        text: 'Fees capped at 0.40%. You\'ll mostly see passive index ETFs — funds that simply track a market index like the S&P 500 instead of paying analysts to pick stocks. Study after study shows these beat most actively managed funds over 10+ years, largely because of lower fees.',
         icon: Wallet,
       });
       break;
@@ -284,7 +284,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.minAUM = 10_000_000;
       reasoning.push({
         key: 'size',
-        text: 'Min fund size set to $10M. This ensures you can buy and sell without moving the price. Avoid micro-funds.',
+        text: 'We\'re only showing funds with at least $10M in total assets. Tiny funds can be hard to buy and sell, have wider price spreads, and sometimes close down entirely — which forces an inconvenient sale.',
         icon: Wallet,
       });
       break;
@@ -292,7 +292,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.minAUM = 25_000_000;
       reasoning.push({
         key: 'size',
-        text: 'Min fund size set to $25M. At your portfolio size, liquidity matters — you need funds that trade smoothly.',
+        text: 'Minimum fund size set to $25M. At your investment level, you want funds that trade smoothly with tight bid-ask spreads. Small funds can have hidden costs when you go to sell.',
         icon: Wallet,
       });
       break;
@@ -301,7 +301,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.maxMER = 0.0075;
       reasoning.push({
         key: 'size',
-        text: 'Min fund size $50M, max MER capped at 0.75%. At $100K+ invested, fee differences compound significantly. Every basis point matters.',
+        text: 'Minimum fund size $50M. At $100K+ invested, even small fee differences add up fast — the difference between 0.20% and 0.70% MER on $200K is $1,000 per year, every year, compounding.',
         icon: Wallet,
       });
       break;
@@ -310,7 +310,7 @@ function buildAdvisorProfile(profile: InvestorProfile): {
       limits.maxMER = 0.005;
       reasoning.push({
         key: 'size',
-        text: 'Min fund size $100M, max MER 0.50%. At this scale, only the most liquid, cost-efficient funds deserve your capital.',
+        text: 'Only showing funds with $100M+ in assets and fees under 0.50%. At your portfolio size, you should be in the same funds that pension plans and institutions use — the most liquid, lowest-cost options available.',
         icon: Wallet,
       });
       break;
@@ -392,56 +392,61 @@ const OnboardingFlow = ({ onComplete }: { onComplete: (profile: InvestorProfile)
 
   const steps = [
     {
-      question: "What's your primary investment goal?",
-      subtitle: "This determines which types of ETFs we'll consider.",
+      question: "What matters most to you right now?",
+      subtitle: "Think about why you're investing — there's no wrong answer. This helps us focus on the right type of ETF for your situation.",
+      learn: { text: "What is an ETF?", url: "https://www.investopedia.com/terms/e/etf.asp" },
       key: 'goal' as const,
       options: [
-        { value: 'growth', label: 'Grow my wealth', desc: 'Maximize capital appreciation over time', icon: TrendingUpIcon },
-        { value: 'income', label: 'Generate income', desc: 'Regular cash flow from dividends', icon: CashIcon },
-        { value: 'preservation', label: 'Protect my capital', desc: 'Minimize risk of loss', icon: ShieldIcon },
-        { value: 'balanced', label: 'A bit of everything', desc: 'Steady growth with reasonable safety', icon: BalanceIcon },
+        { value: 'growth', label: 'I want my money to grow over time', desc: 'You\'re not planning to touch this money soon — you want it to build wealth. We\'ll focus on stock-based ETFs with the strongest track records.', icon: TrendingUpIcon },
+        { value: 'income', label: 'I want regular cash coming in', desc: 'You want investments that pay you dividends — real money deposited into your account regularly, like a paycheque from your portfolio.', icon: CashIcon },
+        { value: 'preservation', label: 'I don\'t want to lose what I have', desc: 'Safety first. We\'ll focus on stable, lower-risk funds like bonds and cash equivalents — they won\'t grow fast, but they won\'t keep you up at night.', icon: ShieldIcon },
+        { value: 'balanced', label: 'A healthy mix of growth and safety', desc: 'You want your money to grow, but you also want to sleep at night. We\'ll blend stock funds with bonds for a smoother ride.', icon: BalanceIcon },
       ],
     },
     {
-      question: "How long do you plan to stay invested?",
-      subtitle: "Longer horizons can tolerate more volatility.",
+      question: "When will you need this money?",
+      subtitle: "This is one of the most important questions in investing. The longer you can leave your money invested, the more risk you can afford to take — because you have time to recover from any dips.",
+      learn: { text: "Why time horizon matters", url: "https://www.investopedia.com/terms/t/timehorizon.asp" },
       key: 'horizon' as const,
       options: [
-        { value: 'short', label: 'Under 2 years', desc: 'Need the money relatively soon', icon: null },
-        { value: 'medium', label: '2–5 years', desc: 'Medium-term goal', icon: null },
-        { value: 'long', label: '5–10 years', desc: 'Long-term saving', icon: null },
-        { value: 'very_long', label: '10+ years', desc: 'Retirement or generational wealth', icon: null },
+        { value: 'short', label: 'Within the next 2 years', desc: 'Since you may need this money soon, we\'ll avoid anything too volatile. A big drop right before you need the cash would be devastating.', icon: null },
+        { value: 'medium', label: 'In about 2 to 5 years', desc: 'You have some room for ups and downs, but not enough to ride out a major crash. We\'ll keep things moderate.', icon: null },
+        { value: 'long', label: '5 to 10 years from now', desc: 'Great — this is real investing territory. You can ride out a bad year or two because you have time for the market to recover.', icon: null },
+        { value: 'very_long', label: '10+ years (retirement, long-term savings)', desc: 'This is the sweet spot. Historically, the stock market has always recovered over 10+ years. Time is your biggest advantage.', icon: null },
       ],
     },
     {
-      question: "If your portfolio dropped 20% in a month, you would...",
-      subtitle: "Be honest — there's no wrong answer.",
+      question: "Imagine you invested $10,000 and it dropped to $8,000. What would you do?",
+      subtitle: "This isn't a test — it's about self-awareness. The best investment plan is one you can actually stick with when markets get rough. Most people overestimate their risk tolerance until they see real losses.",
+      learn: { text: "Understanding risk tolerance", url: "https://www.investopedia.com/terms/r/risktolerance.asp" },
       key: 'riskTolerance' as const,
       options: [
-        { value: 'low', label: 'Sell or lose sleep', desc: 'I can\'t stomach big losses', icon: null },
-        { value: 'moderate', label: 'Hold and wait', desc: 'Uncomfortable but I\'d stay the course', icon: null },
-        { value: 'high', label: 'Buy the dip', desc: 'Volatility is opportunity', icon: null },
+        { value: 'low', label: 'I\'d probably sell — I can\'t watch it drop further', desc: 'That\'s completely okay. We\'ll filter out anything that could swing that much. Steady and predictable is the goal.', icon: null },
+        { value: 'moderate', label: 'I\'d feel sick but I\'d hold on', desc: 'You can handle some turbulence as long as it\'s not extreme. We\'ll exclude the riskiest categories but keep solid options on the table.', icon: null },
+        { value: 'high', label: 'I\'d buy more — stocks are on sale', desc: 'You understand that drops are temporary and that volatility is the price of higher returns. We\'ll keep all options available.', icon: null },
       ],
     },
     {
-      question: "How much are you looking to invest?",
-      subtitle: "This helps us set liquidity and fee requirements.",
+      question: "Roughly how much are you planning to invest?",
+      subtitle: "This isn't about judgement — it's about liquidity and fees. Larger portfolios need ETFs that trade easily (high volume) and where even tiny fee differences add up to real money.",
+      learn: { text: "Why fund size matters", url: "https://www.investopedia.com/terms/a/aum.asp" },
       key: 'portfolioSize' as const,
       options: [
-        { value: 'small', label: 'Under $25K', desc: 'Getting started', icon: null },
-        { value: 'medium', label: '$25K – $100K', desc: 'Growing portfolio', icon: null },
-        { value: 'large', label: '$100K – $500K', desc: 'Significant holdings', icon: null },
-        { value: 'institutional', label: '$500K+', desc: 'Substantial capital', icon: null },
+        { value: 'small', label: 'Under $25,000', desc: 'Great starting point. We\'ll make sure you\'re in funds with enough daily trading volume that you can buy and sell without issues.', icon: null },
+        { value: 'medium', label: '$25,000 to $100,000', desc: 'At this level, liquidity starts to matter more. We\'ll stick to well-established funds with real trading volume.', icon: null },
+        { value: 'large', label: '$100,000 to $500,000', desc: 'At this scale, a 0.5% fee difference costs you $500–$2,500 per year. We\'ll prioritize cost-efficient, highly liquid funds.', icon: null },
+        { value: 'institutional', label: 'Over $500,000', desc: 'Every basis point matters. We\'ll only show the most liquid, lowest-cost funds — the kind institutional investors use.', icon: null },
       ],
     },
     {
-      question: "How do you feel about management fees?",
-      subtitle: "A 0.5% vs 1.0% MER difference on $100K costs you $500/year — and compounds.",
+      question: "How do you feel about the fees ETFs charge?",
+      subtitle: "Every ETF charges an annual fee (called the MER — Management Expense Ratio). It's taken automatically from your returns. The difference between a 0.10% fee and a 1.00% fee on $100,000 is $900/year — and it compounds over decades.",
+      learn: { text: "How fees eat your returns", url: "https://www.investopedia.com/articles/personal-finance/092613/pay-attention-your-funds-expense-ratio.asp" },
       key: 'feeAwareness' as const,
       options: [
-        { value: 'low', label: 'I don\'t think about fees', desc: 'Performance matters more', icon: null },
-        { value: 'moderate', label: 'Keep them reasonable', desc: 'Under 0.75% ideally', icon: null },
-        { value: 'high', label: 'Lowest fees possible', desc: 'I want index-fund pricing', icon: null },
+        { value: 'low', label: 'I care more about performance than fees', desc: 'That\'s a valid perspective — some actively managed funds charge more because they aim to beat the market. Just keep in mind that most don\'t succeed long-term.', icon: null },
+        { value: 'moderate', label: 'Keep fees reasonable — under 0.75%', desc: 'A good middle ground. This filters out the most expensive active funds while keeping quality options available.', icon: null },
+        { value: 'high', label: 'Give me the cheapest options possible', desc: 'Smart. Research consistently shows that low-cost index funds outperform most actively managed funds over 10+ years. We\'ll cap fees at 0.40%.', icon: null },
       ],
     },
   ];
@@ -476,7 +481,7 @@ const OnboardingFlow = ({ onComplete }: { onComplete: (profile: InvestorProfile)
               Let's find the right ETFs for you.
             </h1>
             <p className="text-[var(--muted)] text-lg leading-relaxed mb-4">
-              Answer a few quick questions so I can filter 1,680 TSX-listed ETFs down to the ones that actually make sense for your situation.
+              There are over 1,680 ETFs listed on the TSX. Most of them aren't right for you. Answer five quick questions and we'll narrow it down to the ones that actually fit your goals, timeline, and comfort level.
             </p>
             <button
               onClick={() => onComplete(DEFAULT_PROFILE)}
@@ -492,8 +497,14 @@ const OnboardingFlow = ({ onComplete }: { onComplete: (profile: InvestorProfile)
           <div className="mb-2 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">
             Question {step + 1} of {steps.length}
           </div>
-          <h2 className="text-2xl font-semibold mb-1 tracking-tight">{currentStep.question}</h2>
-          <p className="text-[var(--muted)] text-sm mb-8">{currentStep.subtitle}</p>
+          <h2 className="text-2xl font-semibold mb-2 tracking-tight">{currentStep.question}</h2>
+          <p className="text-[var(--muted)] text-sm leading-relaxed mb-2">{currentStep.subtitle}</p>
+          {currentStep.learn && (
+            <a href={currentStep.learn.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline mb-6">
+              <ExternalLink size={10} /> {currentStep.learn.text} — Investopedia
+            </a>
+          )}
+          {!currentStep.learn && <div className="mb-6" />}
 
           <div className="space-y-3">
             {currentStep.options.map((opt) => {
@@ -973,8 +984,11 @@ const App = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold" style={{ fontFamily: 'Instrument Serif, serif' }}>
-                {isNormalized ? 'Normalized Growth' : 'Price History'}
+                {isNormalized ? 'Side-by-Side Comparison' : 'Price History'}
               </h2>
+              {isNormalized && (
+                <span className="text-[11px] text-[var(--muted)] hidden sm:inline">All start at 100 so you can compare fairly</span>
+              )}
               <div className="flex bg-[var(--paper)] rounded-md p-0.5 border border-[var(--border)]">
                 <button onClick={() => setIsNormalized(true)} className={`px-3 py-1 text-[11px] font-semibold rounded transition-all ${isNormalized ? 'bg-[var(--surface)] shadow-sm text-[var(--ink)]' : 'text-[var(--muted)]'}`}>Growth %</button>
                 <button onClick={() => setIsNormalized(false)} className={`px-3 py-1 text-[11px] font-semibold rounded transition-all ${!isNormalized ? 'bg-[var(--surface)] shadow-sm text-[var(--ink)]' : 'text-[var(--muted)]'}`}>Price $</button>
@@ -987,6 +1001,14 @@ const App = () => {
                   {t.replace('.TO', '')} <X size={11} />
                 </button>
               ))}
+              {selectedTickers.length > 1 && (
+                <button
+                  onClick={() => setSelectedTickers([])}
+                  className="flex items-center gap-1 pl-2 pr-2 py-1 rounded-md text-[11px] font-medium text-[var(--muted)] hover:text-[var(--red)] bg-[var(--paper)] hover:bg-red-50 border border-[var(--border)] transition-colors"
+                >
+                  Clear all <X size={10} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -1004,7 +1026,7 @@ const App = () => {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis dataKey="Date" tick={{ fontSize: 10, fill: 'var(--muted)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" tickFormatter={v => new Date(v).toLocaleDateString('en-CA', { month: 'short', year: '2-digit' })} />
-                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--muted)', fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} width={55} tickFormatter={v => isNormalized ? `${Number(v).toFixed(0)}%` : `$${Number(v).toFixed(2)}`} />
+                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--muted)', fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} width={55} tickFormatter={v => isNormalized ? `${Number(v).toFixed(0)}` : `$${Number(v).toFixed(2)}`} />
                   <Tooltip
                     contentStyle={{ background: 'var(--ink)', border: 'none', borderRadius: '8px', padding: '10px 14px', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}
                     itemStyle={{ fontSize: '12px', fontWeight: 600, fontFamily: 'JetBrains Mono', color: '#fff' }}
