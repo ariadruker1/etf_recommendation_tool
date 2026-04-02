@@ -27,10 +27,11 @@ interface ETF {
   maxDrawdown: number;
   volatility: number;
   sortino: number;
+  calmar: number;
   score: number;
 }
 
-type SortKey = 'score' | 'annualReturn' | 'sortino' | 'maxDrawdown' | 'yield' | 'mer' | 'aum';
+type SortKey = 'score' | 'annualReturn' | 'sortino' | 'calmar' | 'maxDrawdown' | 'yield' | 'mer' | 'aum';
 type SortDir = 'asc' | 'desc';
 
 interface InvestorProfile {
@@ -68,6 +69,12 @@ const METRIC_INFO: Record<string, { label: string; desc: string; example: string
     desc: "Risk-adjusted return penalizing only downside volatility. Higher is better.",
     example: 'Sortino of 2.0 = earning 2x your downside risk. Below 0 = underperforming risk-free rates.',
     link: 'https://www.investopedia.com/terms/s/sortinoratio.asp',
+  },
+  calmar: {
+    label: 'Calmar Ratio',
+    desc: 'Annual return divided by maximum drawdown. Measures return per unit of "crash" risk.',
+    example: '15% return / 10% drawdown = 1.5 Calmar. Higher is better.',
+    link: 'https://www.investopedia.com/terms/c/calmarratio.asp',
   },
   mdd: {
     label: 'Max Drawdown',
@@ -1067,6 +1074,7 @@ const App = () => {
                   <SortableHeader label="Score" sortKey="score" currentKey={sortKey} dir={sortDir} onClick={handleSort} className="w-[160px]" />
                   <SortableHeader label="Return" sortKey="annualReturn" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" />
                   <SortableHeader label="Sortino" sortKey="sortino" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" info="sortino" />
+                  <SortableHeader label="Calmar" sortKey="calmar" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" info="calmar" />
                   <SortableHeader label="Drawdown" sortKey="maxDrawdown" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" info="mdd" />
                   <SortableHeader label="Yield" sortKey="yield" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" info="yield" />
                   <SortableHeader label="Fees" sortKey="mer" currentKey={sortKey} dir={sortDir} onClick={handleSort} align="right" info="mer" />
@@ -1106,6 +1114,9 @@ const App = () => {
                       </td>
                       <td className="px-3 py-3.5 text-right">
                         <span className={`text-sm font-mono font-medium ${e.sortino >= 1 ? 'text-[var(--green)]' : e.sortino >= 0 ? 'text-[var(--accent-dim)]' : 'text-[var(--red)]'}`}>{e.sortino.toFixed(2)}</span>
+                      </td>
+                      <td className="px-3 py-3.5 text-right">
+                        <span className={`text-sm font-mono font-medium ${e.calmar >= 1 ? 'text-[var(--green)]' : e.calmar >= 0 ? 'text-[var(--accent-dim)]' : 'text-[var(--red)]'}`}>{e.calmar.toFixed(2)}</span>
                       </td>
                       <td className="px-3 py-3.5 text-right"><span className="text-sm font-mono font-medium text-[var(--red)]">{(e.maxDrawdown * 100).toFixed(1)}%</span></td>
                       <td className="px-3 py-3.5 text-right"><span className="text-sm font-mono font-medium text-[var(--green)]">{(e.yield * 100).toFixed(2)}%</span></td>
