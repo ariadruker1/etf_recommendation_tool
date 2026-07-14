@@ -1,27 +1,21 @@
 {
-  "name": "investments",
+  "name": "tsx-etf-ranker",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "fetch:tickers": "node scripts/fetch_tickers.js",
-    "fetch:etfs": "node scripts/fetch_etfs.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",
     "axios": "^1.13.6",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "recharts": "^3.8.0",
-    "tailwind-merge": "^3.5.0",
-    "yahoo-finance2": "^3.13.2"
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

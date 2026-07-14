@@ -129,9 +129,9 @@ def get_cached_yields(tickers: List[str]) -> dict:
         conn.close()
         return {}
     
-    ticker_list_str = "','".join(tickers)
-    query = f"SELECT ticker, dividend_yield, mer FROM yields WHERE ticker IN ('{ticker_list_str}')"
-    df = conn.execute(query).df()
+    placeholders = ",".join("?" for _ in tickers)
+    query = f"SELECT ticker, dividend_yield, mer FROM yields WHERE ticker IN ({placeholders})"
+    df = conn.execute(query, tickers).df()
     conn.close()
     
     return {r['ticker']: {"dividendYield": r['dividend_yield'] or 0.0, "mer": r['mer'] or 0.005} 
@@ -140,11 +140,16 @@ def get_cached_yields(tickers: List[str]) -> dict:
 
 def _background_fetch_yields(tickers: List[str]):
     global _yield_warmup_done
+    if not tickers:
+        _yield_warmup_done = True
+        return
     conn = get_conn()
     staleness = (datetime.now() - timedelta(days=CACHE_STALENESS_DAYS)).date()
 
-    ticker_list_str = "','".join(tickers)
-    existing = conn.execute(f"SELECT ticker, last_updated FROM yields WHERE ticker IN ('{ticker_list_str}')").df()
+    placeholders = ",".join("?" for _ in tickers)
+    existing = conn.execute(
+        f"SELECT ticker, last_updated FROM yields WHERE ticker IN ({placeholders})", tickers
+    ).df()
     
     fresh = set(existing[existing['last_updated'].dt.date >= staleness]['ticker'])
     to_fetch = [t for t in tickers if t not in fresh]
@@ -185,7 +190,7 @@ def _background_fetch_yields(tickers: List[str]):
 
 def calculate_metrics_for_window(ticker, start, end, conn):
     df = conn.execute(
-        "SELECT date, close FROM prices WHERE ticker = ? AND date >= ? AND date <= ? ORDER BY date",
+        "SELECT date, close FROM prices WHERE ticker = ? AND date >= CAST(? AS DATE) AND date <= CAST(? AS DATE) ORDER BY date",
         [ticker, start, end]
     ).df()
     
@@ -351,16 +356,16 @@ async def get_history(
     fetch_and_cache(tickers)
     
     # Efficient DuckDB query for multiple tickers
-    ticker_list_str = "','".join(tickers)
+    placeholders = ",".join("?" for _ in tickers)
     query = f"""
         SELECT date AS Date, ticker, close
         FROM prices
-        WHERE ticker IN ('{ticker_list_str}')
-          AND date >= '{start}'
-          AND date <= '{end}'
+        WHERE ticker IN ({placeholders})
+          AND date >= CAST(? AS DATE)
+          AND date <= CAST(? AS DATE)
         ORDER BY date, ticker
     """
-    df_all = conn.execute(query).df()
+    df_all = conn.execute(query, [*tickers, start, end]).df()
     conn.close()
     
     if df_all.empty: return []

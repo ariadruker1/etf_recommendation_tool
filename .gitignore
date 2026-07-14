@@ -13,9 +13,15 @@ dist-ssr
 *.local
 .env
 
-# SQLite cache (regenerated on startup)
+# Local data cache (regenerated on startup)
 backend/cache.db
 backend/cache.db-journal
+backend/cache.duckdb
+backend/cache.duckdb.wal
+
+# Python
+.venv
+venv
 __pycache__
 backend/__pycache__
 
