@@ -6,6 +6,7 @@ from typing import List, Optional
 import re
 import duckdb
 import threading
+import time
 from datetime import datetime, timedelta
 import numpy as np
 import os
@@ -88,6 +89,7 @@ def fetch_and_cache(tickers: List[str], force_refresh: bool = False):
         return
 
     print(f"[prices] Fetching {len(to_fetch)} tickers...")
+    empty_batches = 0
     for i in range(0, len(to_fetch), 20):
         batch = to_fetch[i:i+20]
         try:
@@ -99,23 +101,39 @@ def fetch_and_cache(tickers: List[str], force_refresh: bool = False):
             else:
                 tickers_to_save = []
 
+            saved_any = False
             for ticker, tdf in tickers_to_save:
                 try:
                     sdf = tdf['Close'].dropna().reset_index()
+                    if sdf.empty:
+                        # Failed download (e.g. rate limited) — leave the ticker
+                        # unstamped so it gets retried on the next request.
+                        continue
                     sdf['ticker'] = ticker
                     sdf['Date'] = pd.to_datetime(sdf['Date']).dt.date
                     sdf = sdf[['ticker', 'Date', 'Close']]
                     sdf.columns = ['ticker', 'date', 'close']
-                    
+
                     conn.execute("DELETE FROM prices WHERE ticker = ?", [ticker])
                     conn.register('sdf_temp', sdf)
                     conn.execute("INSERT INTO prices SELECT * FROM sdf_temp")
                     conn.unregister('sdf_temp')
-                    
+
                     conn.execute("INSERT OR REPLACE INTO metadata VALUES (?, ?)",
                                  [ticker, datetime.now().date()])
+                    saved_any = True
                 except Exception as e:
                     print(f"  err {ticker}: {e}")
+
+            if saved_any:
+                empty_batches = 0
+            else:
+                empty_batches += 1
+                if empty_batches >= 3:
+                    print("[prices] Aborting fetch: repeated empty batches (Yahoo is likely "
+                          "rate limiting). Unfetched tickers will retry on the next request.")
+                    break
+            time.sleep(1)
         except Exception as e:
             print(f"  batch err: {e}")
     conn.close()
@@ -160,30 +178,40 @@ def _background_fetch_yields(tickers: List[str]):
         return
 
     print(f"[yields] Background fetching {len(to_fetch)} tickers...")
+    failed = 0
     for i, ticker in enumerate(to_fetch):
-        div_yield = 0.0
-        mer = 0.005
         try:
             info = yf.Ticker(ticker).info
-            div_yield = float(info.get('dividendYield', 0) or 0)
+            # yfinance >= 1.x: 'yield' is a fraction (0.0217), 'dividendYield'
+            # is a percentage (2.17). Prefer the fraction; frontend expects it.
+            div_yield = float(info.get('yield') or 0)
+            if not div_yield:
+                div_yield = float(info.get('dividendYield') or 0) / 100
+            mer = 0.005
             for key in ('annualReportExpenseRatio', 'totalExpenseRatio', 'expenseRatio'):
                 val = info.get(key)
                 if val and val > 0:
                     mer = float(val)
                     break
         except Exception:
-            pass
+            # Don't cache failures (e.g. rate limits) — leave the ticker
+            # missing so it gets retried on the next startup.
+            failed += 1
+            time.sleep(2)
+            continue
 
         c = get_conn()
         c.execute("INSERT OR REPLACE INTO yields VALUES (?, ?, ?, ?)",
                   [ticker, div_yield, mer, datetime.now().date()])
         c.close()
 
+        time.sleep(0.2)  # stay under Yahoo's rate limit
         if (i + 1) % 50 == 0:
             print(f"  [yields] {i+1}/{len(to_fetch)} done")
 
+    print(f"[yields] Done: {len(to_fetch) - failed} updated, {failed} failed (will retry next startup)")
+
     _yield_warmup_done = True
-    print(f"[yields] Done: {len(to_fetch)} tickers updated")
 
 
 # ── Metrics calculation (DuckDB optimized) ───────────────────────────────────
