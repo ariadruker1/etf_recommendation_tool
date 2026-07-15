@@ -22,7 +22,14 @@ pip3 install -r backend/requirements.txt
 python3 backend/main.py
 ```
 
-The API runs at http://localhost:8000. On first launch it warms a DuckDB price cache from Yahoo Finance (subsequent starts are fast).
+The API runs at http://localhost:8000.
+
+**What to expect on first launch.** The DuckDB cache (`backend/cache.duckdb`) is not committed — it's built from Yahoo Finance on your machine:
+
+- On startup, yield data for ~1,100 tickers is fetched in a background thread (throttled, takes ~5 minutes). The app is usable immediately; yields show as 0.00% until their fetch completes, so refresh after a few minutes.
+- The first ranking request also fetches price history for its candidate ETFs, so it takes noticeably longer than usual. Subsequent starts and requests are fast — cached data is reused for 7 days.
+- `HTTP Error 404: Quote not found` log lines are normal: the TSX universe includes `.U` (USD-denominated) and `.B` unit classes plus some delisted funds that Yahoo doesn't list. Those funds simply won't have yield data.
+- If Yahoo rate-limits (`Too Many Requests`), failed fetches are never cached — they retry automatically on the next request or restart. Waiting 30–60 minutes clears the limit.
 
 ### 2. Frontend (Node 18+)
 
@@ -54,7 +61,8 @@ src/App.tsx                React dashboard: quiz, advisor panel, table, charts
 ## Data Sources
 
 - Metadata: `data/ETF-overview.csv` (TSX ETF universe)
-- Prices, yields, fees: Yahoo Finance via `yfinance`, cached in DuckDB with 7-day staleness refresh
+- Prices and yields: Yahoo Finance via `yfinance`, cached in DuckDB with 7-day staleness refresh
+- Fees (MER): Yahoo publishes no expense-ratio data for TSX-listed funds, so a 0.50% placeholder is used for all ETFs — treat the fee column and fee-based filtering as illustrative until a real fee source is wired in
 
 ## Author
 
