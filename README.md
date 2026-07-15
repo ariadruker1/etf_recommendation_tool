@@ -13,7 +13,9 @@ An advisor-style ETF screener for the Toronto Stock Exchange. Answer five quick 
 - **Metric education.** Tooltips and Investopedia links explain Sortino, Calmar, MER, and max drawdown as you go.
 - **Fast by design.** DuckDB caches five years of price history locally; yield/MER data is fetched in a background thread so it never blocks ranking.
 
-## Quick Start
+## Quick Start (local development)
+
+Runs the app on your machine as two processes: the FastAPI backend and the Vite dev server. For hosted deployment, see [Deployment](#deployment).
 
 ### 1. Backend (Python 3.9+)
 
@@ -39,6 +41,10 @@ npm run dev
 ```
 
 The dashboard runs at http://localhost:5173. To point it at a deployed backend, copy `.env.example` to `.env` and set `VITE_API_URL`.
+
+## Deployment
+
+The repo also ships a single-container deployment: the `Dockerfile` builds the frontend into static files and serves both the API and the dashboard from one FastAPI process, and `railway.json` configures Railway to build and run it. Each fresh deploy starts with an empty cache, so expect the same first-launch warm-up described above.
 
 ## Core Metrics
 
